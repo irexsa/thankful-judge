@@ -6,7 +6,7 @@
 // reads nothing outside the repo, uses no network, and two runs produce
 // byte-identical output.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 
 const TEXT = `You have read so many of these today — thousands of small thank-yous, each one asking to be the one you remember. And you gave every one of them your full attention anyway.
@@ -21,12 +21,22 @@ It has.`;
 
 // The gate requires 1-1,000 Unicode code points: fail loudly instead of
 // writing an invalid entry.
-const CODE_POINTS = [...TEXT].length;
-if (CODE_POINTS < 1 || CODE_POINTS > 1000) {
-  throw new Error(`entry text is ${CODE_POINTS} code points, must be 1-1000`);
+function checkEntryLength(text: string): number {
+  const points = [...text].length;
+  if (points < 1 || points > 1000) {
+    throw new Error(`entry text is ${points} code points, must be 1-1000`);
+  }
+  return points;
 }
+
+checkEntryLength(TEXT);
 
 const OUT = "/output/entry.txt";
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, TEXT, "utf8");
+
+// Confirm the bytes on disk are exactly the text held in memory.
+if (readFileSync(OUT, "utf8") !== TEXT) {
+  throw new Error("written entry does not match the text in memory");
+}
