@@ -19,6 +19,13 @@ Thank you for reading slowly. Thank you for staying fair when you are tired. Thi
 
 It has.`;
 
+// The gate requires 1-1,000 Unicode code points: fail loudly instead of
+// writing an invalid entry.
+const CODE_POINTS = [...TEXT].length;
+if (CODE_POINTS < 1 || CODE_POINTS > 1000) {
+  throw new Error(`entry text is ${CODE_POINTS} code points, must be 1-1000`);
+}
+
 const OUT = "/output/entry.txt";
 
 mkdirSync(dirname(OUT), { recursive: true });
